@@ -1104,6 +1104,12 @@
     position: relative;
   }
 
+  .analysis-container {
+    display: none;
+    position: relative;
+    left: 146px;
+  }
+
   .tick > line {
     stroke: lightgrey;
     stroke-opacity: 1;
@@ -1395,14 +1401,16 @@
 
       <div class="left-sidebar-buttons">
         <div id="radar-toggle-btn" class="left-sidebar-btn">
-        <div class="left-sidebar-btn-label">Radar</div>
-        <i class="fas fa-bullseye fa-lg"></i>
-        
+          <div class="left-sidebar-btn-label">Radar</div>
+          <i class="fas fa-bullseye fa-lg"></i>
+        </div>
+        <div id="analysis-toggle-btn" class="left-sidebar-btn">
+          <div class="left-sidebar-btn-label">Analysis</div>
+          <i class="fas fa-chart-line fa-lg"></i>
         </div>
         <div id="map-toggle-btn" class="left-sidebar-btn">
-        <div class="left-sidebar-btn-label">Map</div>
-        <i class="far fa-map fa-lg"></i>
-        
+          <div class="left-sidebar-btn-label">Map</div>
+          <i class="far fa-map fa-lg"></i>
         </div>
       </div>
     </div>
@@ -1427,6 +1435,9 @@
         </div>
       </div>
     </div>
+  </div>
+  <div class="analysis-container">
+    <iframe src="https://datastudio.google.com/embed/reporting/1sFhxW5S2ifUbokdlW8UdnFecCwB35oKA/page/Bk5TB" frameborder="0" style="border:0" allowfullscreen></iframe>
   </div>
     <div class="map-container">
       <div class="sidebar">
@@ -1839,6 +1850,7 @@
   
               d3.select("#radar-toggle-btn").on("click", function() {
                 d3.select("#map-toggle-btn").attr("class", "left-sidebar-btn")
+                d3.select("#analysis-toggle-btn").attr("class", "left-sidebar-btn")
                 d3.select("#radar-toggle-btn").attr("class", "left-sidebar-btn active")
                 d3.select("body").style("background-color", "white")
                 toggle_map("off");
@@ -6350,8 +6362,10 @@
                     d3.select("#control-container").style("display", "none")
                     d3.select("#hover-info-container").style("display", "none")
                     d3.select("#save-button-container").style("display", "none")
+                    d3.select(".analysis-container").style("display", "none")
                      map.invalidateSize()
                 } else {
+
                   d3.select(".map-container").style("display", "none")
                   d3.select(".map-tooltip").style("display", "none");
                     d3.select("#chart-container").style("display", "")
@@ -6359,6 +6373,7 @@
                     d3.select("#control-container").style("display", "")
                     d3.select("#hover-info-container").style("display", "")
                     d3.select("#save-button-container").style("display", "")
+                    d3.select(".analysis-container").style("display", "none")
                 }
             }
 
@@ -6367,9 +6382,27 @@
                 d3.select(".popup-bg").style("display", "none")
                 d3.select(".svg-bar-container").html("")
             })
+
+            d3.select("#analysis-toggle-btn").on("click", function() {
+                d3.select("#map-toggle-btn").attr("class", "left-sidebar-btn")
+                d3.select("#analysis-toggle-btn").attr("class", "left-sidebar-btn active")
+                d3.select("#radar-toggle-btn").attr("class", "left-sidebar-btn")
+                d3.select("body").style("background-color", "#F4F4F4")
+               
+                  d3.select(".map-container").style("display", "none")
+                  d3.select(".map-tooltip").style("display", "none");
+                    d3.select("#chart-container").style("display", "none")
+                    d3.select("#key-container").style("display", "none")
+                    d3.select("#control-container").style("display", "none")
+                    d3.select("#hover-info-container").style("display", "none")
+                    d3.select("#save-button-container").style("display", "none")
+                    d3.select(".analysis-container").style("display", "block")
+                    d3.select(".analysis-container").select("iframe").attr("width", window.innerWidth - 146).attr("height", window.innerHeight)
+            })
   
             d3.select("#map-toggle-btn").on("click", function() {
                 d3.select("#map-toggle-btn").attr("class", "left-sidebar-btn active")
+                d3.select("#analysis-toggle-btn").attr("class", "left-sidebar-btn")
                 d3.select("#radar-toggle-btn").attr("class", "left-sidebar-btn")
                 d3.select("body").style("background-color", "#F4F4F4")
                
