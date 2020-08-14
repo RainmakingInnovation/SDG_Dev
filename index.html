@@ -3089,7 +3089,13 @@
                     );
                   })
                   .attr("d", tmpArc)
-                  .attr("opacity", 1)
+                  .attr("opacity", function() {
+                    if (radial == "year") {
+                      return 1
+                    } else {
+                      return 0
+                    }
+                  })
                   .attr("fill", yearSegmentColorScale(v.key))
                   .style("cursor", "pointer")
                   /*.on("click", function(d) {
@@ -3257,7 +3263,14 @@
                 .append("textPath")
                 .attr("xlink:href", "#nascent-label-path")
                 .attr("startOffset", "50%")
-                .text("Nascent");
+                .text("Nascent")
+                .attr("opacity", function() {
+                  if (radial == "maturity") {
+                    return 1
+                  } else {
+                    return 0
+                  }
+                })
     
               var emergingLabel = chartSVG
                 .append("g")
@@ -3283,7 +3296,14 @@
                 .append("textPath")
                 .attr("xlink:href", "#emerging-label-path")
                 .attr("startOffset", "50%")
-                .text("Emerging");
+                .text("Emerging")
+                .attr("opacity", function() {
+                  if (radial == "maturity") {
+                    return 1
+                  } else {
+                    return 0
+                  }
+                })
     
               count_by_year.forEach(function(d, i) {
                 this["year" + d.key + "LabelRadius"] = d.outer - 10;
@@ -3314,7 +3334,13 @@
                       .append("textPath")
                       .attr("xlink:href", "#year-" + d.key + "-label-path")
                       .attr("startOffset", "50%")
-                      .text(d.key);
+                      .text(d.key).attr("opacity", function() {
+                        if (radial == "year") {
+                          return 1
+                        } else {
+                          return 0
+                        }
+                      })
               });
     
               var matureLabel = chartSVG
@@ -3341,7 +3367,14 @@
                 .append("textPath")
                 .attr("xlink:href", "#mature-label-path")
                 .attr("startOffset", "50%")
-                .text("Mature");
+                .text("Mature")
+                .attr("opacity", function() {
+                  if (radial == "maturity") {
+                    return 1
+                  } else {
+                    return 0
+                  }
+                })
     
               maturity_list_elements = [
                 { name: "Nascent", fn: nascentLabel },
@@ -3349,10 +3382,12 @@
                 { name: "Mature", fn: matureLabel }
               ];
     
-              maturity_list.forEach(function(d) {
-                var id = "#" + d.name.toLowerCase() + "-label-path-text";
-                d3.select(id).remove();
-              });
+                if (radial == "year") {
+                  maturity_list.forEach(function(d) {
+                    var id = "#" + d.name.toLowerCase() + "-label-path-text";
+                    d3.select(id).remove();
+                  });
+                }
     
               count_by_year.forEach(function(d) {
                 chartPieData.forEach(function(v) {
@@ -3362,7 +3397,13 @@
                       "-" +
                       v.data.value.key.replace(/ /g, "-").replace(/&/g, "and").replace(/:/g, "") +
                       "-segment"
-                  ).attr("opacity", 1);
+                  ).attr("opacity", function() {
+                    if (radial == "year") {
+                      return 1
+                    } else {
+                      return 0
+                    }
+                  })
                 });
               });
                 // transition nodes (or create if first)
@@ -4932,17 +4973,6 @@
                     };
                   });
   
-                nodes_activity
-                  .transition()
-                  .duration(animationDuration)
-                  .attrTween("transform", function(d) {
-                    var i = d3.interpolate(d.x - d.yearX, 0);
-                    var j = d3.interpolate(d.y - d.yearY, 0);
-                    return function(t) {
-                      return "translate(" + i(t) + "," + j(t) + ")";
-                    };
-                  });
-  
                 nodes_acquired
                   .transition()
                   .duration(animationDuration)
@@ -5006,17 +5036,7 @@
                       return i(t);
                     };
                   });
-  
-                nodes_activity
-                  .transition()
-                  .duration(animationDuration)
-                  .attrTween("transform", function(d) {
-                    var i = d3.interpolate(0, d.x - d.yearX);
-                    var j = d3.interpolate(0, d.y - d.yearY);
-                    return function(t) {
-                      return "translate(" + i(t) + "," + j(t) + ")";
-                    };
-                  });
+
   
                 nodes_acquired
                   .transition()
@@ -5198,14 +5218,6 @@
               if (type === "activity") {
                 nodes.attr("opacity", function(d) {
                   if (d["Activity/Acquisition Time"] != "" && d.hide === false) {
-                    return 1;
-                  } else {
-                    return 0.3;
-                  }
-                });
-  
-                nodes_activity.attr("opacity", function(d) {
-                  if (d["Activity/Acquisition Time"] != "") {
                     return 1;
                   } else {
                     return 0.3;
