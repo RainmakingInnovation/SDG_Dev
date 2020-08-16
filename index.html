@@ -1632,7 +1632,7 @@
             "translate(" + width / 2 + "," + (height / 2 + 20) + ")"
           );
 
-          var gSVG = svg
+          var nodeSVG = svg
           .append("g")
           .attr(
             "transform",
@@ -2957,6 +2957,60 @@
 
             oppSpaceFontData = categoryFontObject[1]
 
+                  nodes = nodeSVG
+                  .selectAll("nodes")
+                  .data(data)
+                  .enter()
+                  .append("a")
+                  .attr("xlink:href", function(d) {
+                    return formatURL(d.Website)
+                  })
+                  .attr("class", "a-nodes")
+                  .attr("target", "_blank")
+                  .append("circle")
+                  .each(function(d) {
+                    d.hide = false;
+                  })
+                  .attr("class", "nodes nodes-default")
+                  .attr("r", 0)
+                  .attr("cx", function(d) {
+                    return 0
+                  })
+                  .attr("cy", function(d) {
+                    return 0
+                  })
+                  .attr("fill", function(d) {
+                    return nodeColorScale(
+                        fundingCategoryScale(d["Funding Round"])
+                      );
+                  })
+                  .on("mouseover", function(d) {
+                    showNodeTooltip(d)
+                  })
+                  .on("mouseout", hideNodeTooltip);
+
+                  nodes_acquired = nodeSVG
+                  .selectAll("nodes-acquired")
+                  .data(data)
+                  .enter()
+                  .append("a")
+                  .attr("xlink:href", function(d) {
+                    return formatURL(d.Website)
+                  })
+                  .attr("target", "_blank")
+                  .append("rect")
+                  .attr("class", "nodes nodes-acquired")
+                  .attr("id", function(d) {
+                    return d["Startup Name"].toLowerCase().replace(/ /g, "-");
+                  })
+                  .attr("x", 0)
+                  .attr("y", 0)
+                  .attr("fill", "#FFFD99")
+                  .on("mouseover", function(d) {
+                    showNodeTooltip(d)
+                  })
+                  .on("mouseout", hideNodeTooltip);
+
 
 
             function remove_compass() {
@@ -2975,10 +3029,6 @@
               d3.select("#mature-label-path").remove()
               d3.selectAll(".year-label-paths").remove()
               d3.selectAll(".hiddenDonutArcs").remove()
-
-              // delete later
-              d3.selectAll(".a-nodes").remove()
-              d3.selectAll(".nodes-default").remove()
               
             }
 
@@ -3406,13 +3456,6 @@
                   })
                 });
               });
-                // transition nodes (or create if first)
-                /*
-                 - determine positions
-                    - (0, 0) if not showing
-                    - set variable to not show or show
-                    - fade in/out + move to correct position
-                */
 
                 if (state.level == 0) {
                   chosen_field = "Primary SDG"
@@ -3628,21 +3671,9 @@
                       }
                   });
 
-                  nodes = chartSVG
-                  .selectAll("nodes")
-                  .data(data)
-                  .enter()
-                  .append("a")
-                  .attr("xlink:href", function(d) {
-                    return formatURL(d.Website)
-                  })
-                  .attr("class", "a-nodes")
-                  .attr("target", "_blank")
-                  .append("circle")
-                  .each(function(d) {
-                    d.hide = false;
-                  })
-                  .attr("class", "nodes nodes-default")
+                  nodes
+                  .transition()
+                  .duration(animationDuration)
                   .attr("r", function(d) {
                     if (
                         d["Funding Round"] !== "Acquired"
@@ -3657,35 +3688,24 @@
                     }
                   })
                   .attr("cx", function(d) {
-                    return d.yearX;
+                    if (d.show == 0) {
+                      return 0;
+                    } else {
+                      return d.yearX
+                    }
                   })
                   .attr("cy", function(d) {
-                    return d.yearY
+                    if (d.show == 0) {
+                      return 0;
+                    } else {
+                      return d.yearY
+                    }
                   })
-                  .attr("fill", function(d) {
-                    return nodeColorScale(
-                        fundingCategoryScale(d["Funding Round"])
-                      );
-                  })
-                  .on("mouseover", function(d) {
-                    showNodeTooltip(d)
-                  })
-                  .on("mouseout", hideNodeTooltip);
+
             
-                nodes_acquired = chartSVG
-                  .selectAll("nodes-acquired")
-                  .data(data)
-                  .enter()
-                  .append("a")
-                  .attr("xlink:href", function(d) {
-                    return formatURL(d.Website)
-                  })
-                  .attr("target", "_blank")
-                  .append("rect")
-                  .attr("class", "nodes nodes-acquired")
-                  .attr("id", function(d) {
-                    return d["Startup Name"].toLowerCase().replace(/ /g, "-");
-                  })
+                  nodes_acquired
+                  .transition()
+                  .duration(animationDuration)
                   .attr("width", function(d) {
                     if (
                         d["Funding Round"] == "Acquired"
@@ -3712,16 +3732,14 @@
                       return 0;
                     }
                   })
-                  .attr("x", 0)
-                  .attr("y", 0)
-                  .attr("fill", "#FFFD99")
                   .attr("transform", function(d) {
-                    return "translate(" + d.yearX + "," + d.yearY + ")    rotate(45)";
+                    if (d.show == 0) {
+                      return "translate(" + d.yearX + "," + d.yearY + ")    rotate(45)";
+                    } else {
+                      return "translate(" + 0 + "," + 0 + ")    rotate(45)";
+                    }
                   })
-                  .on("mouseover", function(d) {
-                    showNodeTooltip(d)
-                  })
-                  .on("mouseout", hideNodeTooltip);
+
     
 
             }
@@ -5243,7 +5261,8 @@
               });
             }
 
-            function showOppSpaceTooltip(segment_data, clicked = "") {              
+            function showOppSpaceTooltip(segment_data, clicked = "") {  
+              segmentDesc = ""            
               desc.forEach(function(v) {
                 if (
                   segment_data.data.value.key ===
@@ -5335,10 +5354,10 @@
                 if (d["Funding amount ($)"] == 0) {
                   fundingVal = "Undisclosed"
                 } else {
-                  fundingVal = "$" + formatFunding(d["Funding amount ($)"])
+                  fundingVal = formatFunding(d["Funding amount ($)"])
                 }
               } else {
-                fundingVal = "$" + formatFunding(d["Funding amount ($)"])
+                fundingVal = formatFunding(d["Funding amount ($)"])
               }
 
               d3.select(".node-tooltip-title").text(d["Startup Name"]);
@@ -6149,11 +6168,12 @@
             }
           }
           if (total_funding <= 900000 && total_funding > 1000) {
-            fundingFormatted = Math.round(total_funding / 10) / 100 + "K";
+            fundingFormatted = "$" + Math.round(total_funding / 10) / 100 + "K";
           }
           if (total_funding > 900000) {
-            fundingFormatted = Math.round(total_funding / 10000) / 100 + "M";
+            fundingFormatted = "$" + Math.round(total_funding / 10000) / 100 + "M";
           }
+          
           return fundingFormatted;
         }
   
